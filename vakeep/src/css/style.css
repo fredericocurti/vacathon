@@ -1,0 +1,77 @@
+html, body, #root{
+  height: 100%
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  font-family: sans-serif;
+  background-color: #efefef;
+}
+
+div.centered{
+  width: 400px !important;
+  display: block !important;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.root{
+  height: 100%;
+  width: 100%;
+}
+
+.wave {
+  position: absolute;
+  height: 70px;
+  width: 600px;
+  background: #e0efe3;
+}
+
+.blue-top {
+  height: 200px;
+  background-color: #9fd9f6;
+  position: absolute;
+  width: 100%;
+}
+
+.card {
+  z-index: 10
+}
+
+.frame {
+  z-index: 10;
+  position: relative;
+  top: 100px;
+  height: 200px;
+  max-width: 700px;
+}
+
+.income {
+  display: flex;
+  font-size: 36pt;
+  align-self: center;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Helvetica Neue",
+      "Lucida Grande";
+  font-weight : bold
+}
+
+.sound-wave {
+  position:absolute;
+  bottom : 0;
+  width: 100%;
+  display: block !important;
+  height: 50px;
+}
+
+.hidden{
+  display: none !important
+}
+
+.record-button {
+  margin-bottom: 30px;
+}
+
+.record-button button {
+  background-color: #b60041 !important;
+}
