@@ -1,3 +1,6 @@
+@import url('https://fonts.googleapis.com/css?family=Neucha');
+
+
 html, body, #root{
   height: 100%
 }
@@ -62,16 +65,32 @@ div.centered{
   width: 100%;
   display: block !important;
   height: 50px;
+  z-index: 5 !important;
 }
 
 .hidden{
   display: none !important
 }
 
+.record-button-wrapper {
+  z-index: 10 !important;
+  position: fixed;
+  margin-bottom: 20px;
+}
+
 .record-button {
-  margin-bottom: 30px;
 }
 
 .record-button button {
-  background-color: #b60041 !important;
+  /* background-color: #b60041 !important; */
+}
+
+.app-logo{
+  position: absolute;
+  z-index: 1;
+  margin-top: 20px;
+  right: calc(50% - 56px);
+  font-size: 26pt;
+  color: white;
+  font-family: 'Neucha', cursive;
 }
