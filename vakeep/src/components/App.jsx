@@ -4,10 +4,12 @@ import '../css/materialize.css'
 import '../css/style.css'
 import store from '../helpers/store'
 import _ from 'lodash'
-import { Card, FloatingActionButton, FontIcon, CircularProgress, Snackbar } from 'material-ui'
+import { Card, FloatingActionButton, FontIcon, CircularProgress, Snackbar, IconButton } from 'material-ui'
 import { ReactMic } from 'react-mic';
 import watson from '../helpers/watson'
 import { white } from 'material-ui/styles/colors';
+
+import Modal from './Modal'
 
 var SpeechToText = require('watson-speech/speech-to-text');
 const TOKEN = 'u%2BdhDSDZBwJDQRMxJo%2F5R8ovnZjqXjlIuMlNxPNS9C1pjNplhTwDeL%2BujnM5R06Gwvn7hoNl6KrePt56MTii8Kt77yfmhqdimAnJEmhHAVFBtKyMlAI%2FDlhlpNSIWag%2F%2FG4jVfSN3%2FKGdb%2FvO10O6FeFISmLNwxvRHjEyhyQ8eE2UuxaL9BL7ds9TjItSkgG9EcntbqwLJ25uUqtMCBmU6mbwsUlMWVfkTpozXF3kA7Ab1Psi%2BHPUBEe75d7oJThcw2gI3CGTIOY8sNwU4V%2FRyacKO2uUwv%2B7tj9%2BGVjrqJvQEERpnUZOBzWSpNu6p7nJZKUkIyrYFsRAivXzGOfNe52o9MkbiBfKQWH7ZXHgY3Rc0umcMZFHOj5UhdK01MHA4Ch72oUnhX4Cmiprh5QSKqWwceMGUZdDjsgQRC%2FV5Qr6cRG1ZPvvTZgLZkjWZXYzAirMT5VIYWDmFxNtnk%2BXtSXChccvyo9Mkt7ieXh55LWbhetmB7uG0PzZD4beOvfl%2BpXP2cnzgQE98nOta34CxOX76Px0Wlfz9z3cwaNuU6hX7VwMPTLF%2FsjCZh%2BqcZ2ApudvZe7tjlCXNZ7uLUy4UH8AuxzpcOSObj8QK9T27cSqc78lFw%2BxHRtOPeor7KLpvSBAtPgiXejIWe5sGvndQACEG1LA2TR6KXcbePhg1UxJAkxoFeUmyygMm2fBifidneAnPh0ji7krMx5qTxbcoaqYBTlPBIFCxZHM%2BsIlcAoW3hNfg5Z7Ey2zGJLMBdFh2dCT1bipWRA6f8bpnX7qs2jaqOe9gIwgyDNQiXS03QiJB38IlfTclDCUpvn4i46yMTQguYTQXfKoz4StyhXIIwsYlYe7%2BJXaq2QfggFH3N0xNdk%2BytbIx%2FgyRhPt21TX2dEed5E10iyhTrbbk1x3OvbBxM6kr0cV7ri%2BETKj4ePqcs6JMm1qVZ3W5e%2FtKsjvkzxzJnYldxA892qBn7cAh%2BaDqKK2eI4IlqKvfVpJR0%3D%'
@@ -24,7 +26,11 @@ class App extends Component {
       recording : false,
       waiting : false,
       snackbarVisible : false,
-      snackbarMessage : ''
+      snackbarMessage : '',
+      modal : {
+        open : true,
+        data : {}
+      }
     }
   }
 
@@ -54,8 +60,16 @@ class App extends Component {
     res = await res.json()
     console.log(res)
     this.setState({ waiting: false })
-    if (res.intents = []){
+    if (res.intents == []){
       this.setState({snackbarMessage : 'Nenhuma ação foi detectada',snackbarVisible:true})
+    } else {
+      this.handleIntents(res)
+    }
+  }
+
+  handleIntents = (res) => {
+    if (res.intents != []){
+      this.setState({...this.state, modal : { open : true, data : res }})
     }
   }
 
@@ -101,7 +115,17 @@ class App extends Component {
           marginTop : 50
         }}>
 
-          <div> There should be more content here </div>
+          <div style={{ display: 'flex', flexWrap: 'wrap', height: '100%' }}>
+            <div className='action-buttons'>
+              <FontIcon style={{display:'block'}}className='material-icons'>add_circle</FontIcon>
+              <div style={{ marginTop: 5, color: 'gray' }}> Adicionar uma receita </div>
+            </div>
+            <div className='action-buttons'>
+              <FontIcon style={{ display: 'block' }} className='material-icons'>remove_circle</FontIcon>
+              <div style={{marginTop:5, color : 'gray'}}> Adicionar uma despesa </div></div>
+            <div className='action-buttons'> eae </div>
+            <div className='action-buttons'> ea </div>
+          </div>
 
         </Card>
 
@@ -129,6 +153,8 @@ class App extends Component {
           </FloatingActionButton>
       </div>
     
+    { this.state.modal.open ? <Modal open={this.state.modal.open} onClose={()=>{}} data={this.state.modal.data}/> : null }
+
     <Snackbar open={this.state.snackbarVisible} onRequestClose={()=>{this.setState({snackbarVisible : false})}} message={this.state.snackbarMessage} autoHideDuration={4000}></Snackbar>
 
     </div>

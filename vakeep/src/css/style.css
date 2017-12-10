@@ -94,3 +94,32 @@ div.centered{
   color: white;
   font-family: 'Neucha', cursive;
 }
+
+.action-buttons-container {
+  display: flex;
+  flex-wrap: wrap;
+  height: 100%;
+}
+
+.action-buttons {
+  display: flex;
+  width: 50%;
+  height: 50%;
+  align-content: center;
+  align-items: center;
+  align-content: center;
+  justify-content: center;
+  border-top: #e0e0e0 1px solid;
+  border-right: #e0e0e0 1px solid;
+  flex-direction: column
+}
+
+.action-buttons:hover{
+  background-color: #f0f0f0 !important;
+  cursor: pointer;
+}
+
+.action-buttons .material-icons {
+  transform: scale(1.35);
+  color: #9fd9f6 !important; 
+}
