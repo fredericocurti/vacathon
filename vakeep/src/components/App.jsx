@@ -8,6 +8,14 @@ import { Card, FloatingActionButton, FontIcon, CircularProgress, Snackbar, IconB
 import { ReactMic } from 'react-mic';
 import watson from '../helpers/watson'
 import { white } from 'material-ui/styles/colors';
+import {
+  Table,
+  TableBody,
+  TableHeader,
+  TableHeaderColumn,
+  TableRow,
+  TableRowColumn,
+} from 'material-ui/Table';
 
 import Modal from './Modal'
 
@@ -23,6 +31,7 @@ class App extends Component {
   constructor (props) {
     super(props)
     this.state = {
+      tableGeneralRows: [],
       recording : false,
       waiting : false,
       snackbarVisible : false,
@@ -73,6 +82,37 @@ class App extends Component {
     }
   }
 
+  getFinance(){
+    fetch('/api/finances', {
+        method: 'GET'
+    })
+    .then(res => res.json())
+    .then(result => {
+        let rows = []
+        // for (let i =0)
+        // console.log(result)
+        let custoHistory = result.custos;
+        let receitaHistory = result.receitas;
+        let custoTotal = result.custoTotal;
+        let receitasTotal = result.receitastotal
+        console.log(custoHistory)
+        console.log(Object.keys(custoHistory).length)
+        let k,v
+        for ([k,v] of Object.entries(custoHistory)){
+          console.log(v.natureza)
+          
+          rows.push(<TableRow key={k}>
+            {/* <TableRowColumn style={{color: "blue", textAlign: "center"}}>{result[i].id}</TableRowColumn> */}
+            <TableRowColumn style={{color: "blue"}}>{v.hora}</TableRowColumn>
+            <TableRowColumn style={{color: "blue"}}>{v.natureza}</TableRowColumn>
+            <TableRowColumn style={{color: "blue"}}>{v.valor}</TableRowColumn>
+            </TableRow>)
+        }
+        this.setState({tableGeneralRows: rows})
+
+        })   
+  }
+
 
   render () {
     return (
@@ -106,7 +146,7 @@ class App extends Component {
           </div>
 
         </Card>
-
+        
         <Card zDepth={3} className='container frame' containerStyle={{
           display: 'flex',
           flexDirection: 'column',
@@ -156,6 +196,22 @@ class App extends Component {
     { this.state.modal.open ? <Modal open={this.state.modal.open} onClose={()=>{}} data={this.state.modal.data}/> : null }
 
     <Snackbar open={this.state.snackbarVisible} onRequestClose={()=>{this.setState({snackbarVisible : false})}} message={this.state.snackbarMessage} autoHideDuration={4000}></Snackbar>
+    <Table >
+        <TableHeader adjustForCheckbox = {false} displaySelectAll = {false} style={{backgroundColor:'#9FA8DA', color: 'white',}}>
+        <TableRow >
+            {/* <TableHeaderColumn >Id da pergunta</TableHeaderColumn> */}
+            <TableHeaderColumn style={{backgroundColor:'#9FA8DA', color: 'black',}} >hora</TableHeaderColumn>
+            <TableHeaderColumn style={{backgroundColor:'#9FA8DA', color: 'black',}} >natureza</TableHeaderColumn>
+            <TableHeaderColumn style={{backgroundColor:'#9FA8DA', color: 'black',}} >valor</TableHeaderColumn>
+        </TableRow>
+        </TableHeader>
+
+        <TableBody displayRowCheckbox = {false}>
+            {this.state.tableGeneralRows}
+        </TableBody>
+    </Table>
+
+
 
     </div>
     )

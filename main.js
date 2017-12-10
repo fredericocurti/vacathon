@@ -1,6 +1,7 @@
 var express = require('express')
 var app = express()
 var multer = require('multer')
+var firebase = require('firebase')
 
 var fs = require('fs')
 
@@ -8,6 +9,86 @@ const port = 3001
 
 var upload = multer({ dest: __dirname + '/public/uploads/' })
 var type = upload.single('upl')
+// Initialize Firebase
+// TODO: Replace with your project's customized code snippet
+var config = {
+  apiKey: "AIzaSyAUE5v4GX4Ti4QZhNhRLY7rmB7F3co3Ju8",
+  authDomain: "vacathon.firebaseapp.com",
+  databaseURL: "https://vacathon.firebaseio.com",
+  projectId: "vacathon",
+  storageBucket: "vacathon.appspot.com",
+  messagingSenderId: "525053490596"
+}; 
+
+var transacaoObj = (hora, natureza, valor) =>{
+  var transacao ={
+    hora: hora,
+    natureza: natureza,
+    valor: valor
+  }
+  return transacao
+}
+
+firebase.initializeApp(config);
+
+// var query =  firebase.database().ref('/custos').once('value').then((snapshot)=>{
+//   // console.log(snapshot.val())
+//   let result = snapshot.val()
+//   let custoTotal = 0;
+//   let totalResponse = []
+//   for(var i =0; i < Object.keys(result).length; i++){
+//     totalResponse.push(Object.values(result)[i])
+//     console.log(Object.values(result)[i].valor)
+//     custoTotal += parseInt(Object.values(result)[i].valor)
+//   } 
+// })
+
+async function getCustos() {
+  var resJson = {}  
+  var custoTotal = 0;
+  var totalCustoResponse = []
+  var receitaTotal = 0;
+  var totalReceitaResponse = []
+
+  var snapshot = await firebase.database().ref('/custos').once('value')
+
+  var result = snapshot.val() 
+  
+  for(var i =0; i < Object.keys(result).length; i++){
+    totalCustoResponse.push(Object.values(result)[i])
+    custoTotal += parseInt(Object.values(result)[i].valor)
+  }
+  resJson["custos"] = totalCustoResponse
+  resJson["custoTotal"] = custoTotal
+
+  var snapshot = await firebase.database().ref('/receitas').once('value')
+  var result = snapshot.val()
+
+  for(var i =0; i < Object.keys(result).length; i++){
+    totalReceitaResponse.push(Object.values(result)[i])
+    receitaTotal += parseInt(Object.values(result)[i].valor)
+  }
+  
+  resJson["receitas"] = totalReceitaResponse
+  resJson["receitasTotal"] = receitaTotal
+  return resJson
+}
+
+
+// let teste, testeUhu = getCustos()
+
+// function writeTransacaoData(custo) {
+//   firebase.database().ref('receitas').push(custo);
+// }
+
+// var time = new Date().valueOf()
+// console.log(time)
+// writeTransacaoData(transacaoObj(new Date().valueOf(), "venda feno", "300"))
+
+
+app.get('/api/finances',(req,res) => {
+  getCustos().then((data) => {res.json(data)})
+})
 
 app.post('/api/stt', type, (req, res) => {
   console.log('Received request')
