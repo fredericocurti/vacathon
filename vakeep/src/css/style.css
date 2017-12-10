@@ -123,3 +123,31 @@ div.centered{
   transform: scale(1.35);
   color: #9fd9f6 !important; 
 }
+
+.label {
+  height: 48px;
+  text-align: center;
+  vertical-align: center;
+  padding-top: 14px;
+}
+
+.action-title{
+  display: flex;
+  font-size: 36pt;
+  align-self: center;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Helvetica Neue",
+      "Lucida Grande";
+  font-weight : bold !important;
+}
+
+.confirm-icon{
+  transform: scale(2) !important;
+  color: lightgreen !important;
+  margin-right: 10px; 
+}
+
+.cancel-icon{
+  transform: scale(2) !important;
+  color: salmon !important;  
+  margin-right: 20px !important;   
+}
