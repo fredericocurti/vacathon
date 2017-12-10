@@ -8,9 +8,22 @@ import { Card, FloatingActionButton, FontIcon, CircularProgress, Snackbar, IconB
 import { ReactMic } from 'react-mic';
 import watson from '../helpers/watson'
 import { white } from 'material-ui/styles/colors';
+import {
+  Table,
+  TableBody,
+  TableHeader,
+  TableHeaderColumn,
+  TableRow,
+  TableRowColumn,
+} from 'material-ui/Table';
 
 import Modal from './Modal'
 import firebase from 'firebase'
+import moment from 'moment'
+import {capitalize} from 'lodash'
+
+let locale = require('moment/locale/pt-br');
+moment.locale('pt-BR')
 
 const fb = {
   apiKey: "AIzaSyAUE5v4GX4Ti4QZhNhRLY7rmB7F3co3Ju8",
@@ -39,11 +52,13 @@ class App extends Component {
   constructor (props) {
     super(props)
     this.state = {
+      tableGeneralRows: [],
       recording : false,
       waiting : false,
       snackbarVisible : false,
       snackbarMessage : '',
-      modal : {
+      showTable : false,
+        modal : {
         open : false,
         type : null,
         data : null
@@ -54,6 +69,7 @@ class App extends Component {
   componentWillMount () {
     firebase.initializeApp(fb)  
     navigator.mediaDevices.getUserMedia({ audio: true })
+    this.getFinance()
   }
 
   componentDidMount () {
@@ -95,6 +111,49 @@ class App extends Component {
     this.setState({ modal : initModal })
   }
 
+  getFinance(){
+    fetch('/api/finances', {
+        method: 'GET'
+    })
+    .then(res => res.json())
+    .then(result => {
+        let rows = []
+        let custoHistory = result.custos;
+        let receitaHistory = result.receitas;
+        let custoTotal = result.custoTotal;
+        let receitasTotal = result.receitastotal
+        console.log(custoHistory,receitaHistory)
+        console.log(Object.keys(custoHistory).length)
+        let k,v,x,y
+
+        for ([k,v] of Object.entries(custoHistory)){
+          rows.push(
+          <TableRow key={k}>
+            {/* <TableRowColumn style={{ color: "salmon" }}>Despesa</TableRowColumn>                       */}
+            <TableRowColumn style={{color: "gray"}}>{ moment(v.hora).format('DD-MM-YYYY')}</TableRowColumn>
+            <TableRowColumn style={{color: "gray"}}>{capitalize(v.natureza)}</TableRowColumn>
+            <TableRowColumn style={{color: "gray"}}>{capitalize(v.valor)}</TableRowColumn>
+            </TableRow>)
+        }
+
+        
+        for ([x, y] of Object.entries(receitaHistory)) {
+          rows.push(
+            <TableRow key={x}>
+              {/* <TableRowColumn style={{ color: "lightgreen" }}>Receita</TableRowColumn>             */}
+              <TableRowColumn style={{ color: "gray" }}>{moment(y.hora).format('DD-MM-YYYY')}</TableRowColumn>
+              <TableRowColumn style={{ color: "gray" }}>{capitalize(y.natureza)}</TableRowColumn>
+              <TableRowColumn style={{ color: "gray" }}>{capitalize(y.valor)}</TableRowColumn>
+            </TableRow>
+          )
+        }
+
+      this.setState({ tableGeneralRows: rows })
+          
+      })
+           
+  }
+
 
   render () {
     return (
@@ -126,9 +185,35 @@ class App extends Component {
               <span style={{ display : 'flex'}}> Receita </span>          
             </div>
           </div>
-
         </Card>
 
+        {this.state.showTable ?
+          <Card zDepth={3} className='container frame table' containerStyle={{
+            display: 'flex',
+            flexDirection: 'column',
+            flexGrow: 1,
+            height: 100 + '%',
+            marginTop: 50
+          }}>
+
+            <Table >
+              <TableHeader adjustForCheckbox={false} displaySelectAll={false} style={{ backgroundColor: '#9FA8DA', color: 'white', }}>
+                <TableRow >
+                  {/* <TableHeaderColumn >Id da pergunta</TableHeaderColumn> */}
+                  <TableHeaderColumn style={{ backgroundColor: DARK_BLUE, color: 'white', }}>Data</TableHeaderColumn>
+                  <TableHeaderColumn style={{ backgroundColor: DARK_BLUE, color: 'white', }}>Natureza</TableHeaderColumn>
+                  <TableHeaderColumn style={{ backgroundColor: DARK_BLUE, color: 'white', }}>Valor</TableHeaderColumn>
+                </TableRow>
+              </TableHeader>
+
+              <TableBody displayRowCheckbox={false}>
+                {this.state.tableGeneralRows}
+              </TableBody>
+            </Table>
+          </Card>
+
+          : null}
+        
         <Card zDepth={3} className='container frame' containerStyle={{
           display: 'flex',
           flexDirection: 'column',
@@ -153,9 +238,9 @@ class App extends Component {
               <div style={{marginTop:5, color : 'gray'}}> Adicionar uma despesa </div></div>
             <div className='action-buttons'>
               <FontIcon
-                onClick={() => { this.setState({ ...this.state, modal: { open: true, type: 'despesa', data: null } }) }}
+                onClick={() => { this.setState({ showTable : !this.state.showTable }) }}
                 style={{ display: 'block' }} className='material-icons'>assignment</FontIcon>
-                <div style={{ marginTop: 5, color: 'gray' }}> Ver tabela </div>    
+                <div style={{ marginTop: 5, color: 'gray' }}> Ver tabela </div>
             </div>
             <div className='action-buttons'>
               <FontIcon
