@@ -45,14 +45,43 @@ div.centered{
 .frame {
   z-index: 10;
   position: relative;
-  top: 100px;
+  top: 100px; 
   height: 200px;
   max-width: 700px;
 }
 
 .income {
   display: flex;
+  font-size: 20pt;
+  align-self: center;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Helvetica Neue",
+      "Lucida Grande";
+  font-weight : bold;
+  color: gray;
+}
+
+.value {
+  display: flex;
   font-size: 36pt;
+  align-self: center;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Helvetica Neue",
+      "Lucida Grande";
+  font-weight : bold
+}
+
+.income2 {
+  display: flex;
+  font-size: 12pt;
+  align-self: center;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Helvetica Neue",
+      "Lucida Grande";
+  font-weight : bold;
+  color: gray;
+}
+
+.value2 {
+  display: flex;
+  font-size: 20pt;
   align-self: center;
   font-family: system-ui, -apple-system, BlinkMacSystemFont, "Helvetica Neue",
       "Lucida Grande";
@@ -150,4 +179,10 @@ div.centered{
   transform: scale(2) !important;
   color: salmon !important;  
   margin-right: 20px !important;   
+}
+
+.chart{
+  margin-top: 60px;
+  height: auto !important;
+  padding: 0px 15px 15px 15px;
 }

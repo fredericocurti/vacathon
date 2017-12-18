@@ -3,8 +3,7 @@ import { Dialog, FlatButton, TextField, DatePicker, FontIcon, IconButton } from 
 import moment from 'moment'
 import {capitalize} from 'lodash'
 import firebase from 'firebase'
-let locale = require('moment/locale/pt-br');
-moment.locale('pt-BR')
+
 
 class Modal extends Component {
     constructor(props) {

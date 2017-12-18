@@ -1,0 +1,11 @@
+{
+    "hosting": {
+        "public": "vakeep/build",
+        "rewrites": [
+            {
+                "source": "**",
+                "destination": "/index.html"
+            }
+        ]
+    }
+}

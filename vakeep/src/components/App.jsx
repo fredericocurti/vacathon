@@ -5,8 +5,10 @@ import '../css/style.css'
 import store from '../helpers/store'
 import _ from 'lodash'
 import { Card, FloatingActionButton, FontIcon, CircularProgress, Snackbar, IconButton } from 'material-ui'
+import { Doughnut, Line } from 'react-chartjs-2'
 import { ReactMic } from 'react-mic';
 import watson from '../helpers/watson'
+import CountTo from 'react-count-to';
 import { white } from 'material-ui/styles/colors';
 import {
   Table,
@@ -57,8 +59,38 @@ class App extends Component {
       waiting : false,
       snackbarVisible : false,
       snackbarMessage : '',
+      showGraph : false,
       showTable : false,
-        modal : {
+      lucro: '',
+      receita: '',
+      despesa: '',
+      chartData: {
+        labels: [],
+        datasets: [
+          {
+            label: 'Leite',
+            fill: false,
+            lineTension: 0.1,
+            backgroundColor: 'rgba(75,192,192,0.4)',
+            borderColor: 'rgba(75,192,192,1)',
+            borderCapStyle: 'butt',
+            borderDash: [],
+            borderDashOffset: 0.0,
+            borderJoinStyle: 'miter',
+            pointBorderColor: 'rgba(75,192,192,1)',
+            pointBackgroundColor: '#fff',
+            pointBorderWidth: 1,
+            pointHoverRadius: 5,
+            pointHoverBackgroundColor: 'rgba(75,192,192,1)',
+            pointHoverBorderColor: 'rgba(220,220,220,1)',
+            pointHoverBorderWidth: 2,
+            pointRadius: 1,
+            pointHitRadius: 10,
+            data: []
+          }
+        ]
+      },
+      modal : {
         open : false,
         type : null,
         data : null
@@ -70,6 +102,23 @@ class App extends Component {
     firebase.initializeApp(fb)  
     navigator.mediaDevices.getUserMedia({ audio: true })
     this.getFinance()
+    firebase.database().ref('/leite').on('value', (snap) => {
+      let newState = this.state.chartData
+      let dataArray = Object.values(snap.val()).map(val => val.volume)
+      let dataArrayX = Object.values(snap.val()).map(val => moment(val.timestamp).format('HH:mm'))
+      // let dataArray2 = Object.values(snap.val().leite).map(val => val.volume)
+      // let dataArray2X = Object.values(snap.val().leite).map(val => moment(val.timestamp).calendar())
+      let labels = []
+      for (let i = 0; i < dataArray.length; i++) {
+        labels.push(i)
+      }
+
+      newState.labels = dataArrayX
+      newState.datasets[0].data = dataArray
+      // newState.datasets[1].data = dataArray2
+      console.log(dataArray, newState)
+      this.setState({ chartData : newState })
+    })
   }
 
   componentDidMount () {
@@ -109,6 +158,7 @@ class App extends Component {
 
   closeModal = () => {
     this.setState({ modal : initModal })
+    this.getFinance()
   }
 
   getFinance(){
@@ -117,11 +167,19 @@ class App extends Component {
     })
     .then(res => res.json())
     .then(result => {
+        console.log(result)
         let rows = []
         let custoHistory = result.custos;
         let receitaHistory = result.receitas;
         let custoTotal = result.custoTotal;
-        let receitasTotal = result.receitastotal
+        let receitasTotal = result.receitasTotal
+
+        console.log('============')
+        console.log(typeof custoTotal)
+        console.log(typeof receitasTotal)        
+        let lucro = (parseInt(receitasTotal) - parseInt(custoTotal))
+  
+        this.setState({ lucro : lucro, receita : receitasTotal, despesa : custoTotal })
         console.log(custoHistory,receitaHistory)
         console.log(Object.keys(custoHistory).length)
         let k,v,x,y
@@ -149,16 +207,49 @@ class App extends Component {
         }
 
       this.setState({ tableGeneralRows: rows })
-          
-      })
-           
+
+      })        
   }
 
-
   render () {
+    const chartconfig = {
+      type: 'line',
+      options: {
+        responsive: true,
+        title: {
+          display: false,
+          text: 'Chart.js Line Chart'
+        },
+        tooltips: {
+          mode: 'index',
+          intersect: false,
+        },
+        hover: {
+          mode: 'nearest',
+          intersect: true
+        },
+        scales: {
+          xAxes: [{
+            display: true,
+            scaleLabel: {
+              display: true,
+              labelString: 'Tempo'
+            }
+          }],
+          yAxes: [{
+            display: true,
+            scaleLabel: {
+              display: true,
+              labelString: 'Quantidade de leite produzida (Litros)'
+            }
+          }]
+        }
+      }
+    }
+
     return (
       <div className='root'>
-        <span className='app-logo'> Cowkeepy </span>
+        <span className='app-logo'> CowApp </span>
         <div className='blue-top' />
         <Card zDepth={4} className='container frame' containerStyle={{
           display: 'flex',
@@ -170,22 +261,40 @@ class App extends Component {
           <div style={{display: 'flex',
             flex: 2,
             alignContent: 'center',
-            justifyContent: 'center'}}
+            justifyContent: 'center',
+            flexDirection:'column'}}
           >
-            <span className='income'> Receita </span>
+            <span className='value' style={{ color : this.state.lucro >= 0 ? 'black' : 'darkred' }}> R$ {this.state.lucro} </span>          
+            <span className='income'> Lucro </span>
           </div>
 
           <div className='divider' />
 
           <div style={{ flex: 1, flexGrow: 1, display : 'flex' }}>
-            <div style={{ display : 'flex', flex : 1, justifyContent : 'center', alignItems : 'center', borderRight : '1px #e0e0e0 solid'}}>
-              <span style={{ display : 'flex'}}> Receita </span>                                           
+            <div style={{ display: 'flex', flex: 1, justifyContent: 'center', alignItems: 'center', borderRight: '1px #e0e0e0 solid', flexDirection: 'column' }}>
+              <span style={{ display: 'flex', color: 'lightgreen' }} className='value2'> R$ <CountTo to={this.state.receita} speed={500}/></span>                                                         
+              <span style={{ display: 'flex' }} className='income2'> Receitas </span>                                           
             </div>
-            <div style={{ display : 'flex', flex : 1, justifyContent : 'center', alignItems : 'center'}}>
-              <span style={{ display : 'flex'}}> Receita </span>          
+            <div style={{ display : 'flex', flex : 1, justifyContent : 'center', alignItems : 'center', flexDirection : 'column'}}>
+              <span style={{ display: 'flex', color: WINE }} className='value2'> R$ <CountTo to={this.state.despesa} speed={500}/></span>          
+              <span style={{ display: 'flex'}} className='income2'> Despesas </span>                        
             </div>
           </div>
         </Card>
+
+        {this.state.showGraph 
+        ? 
+          <Card zDepth={3} className='container frame chart' containerStyle={{
+            display: 'flex',
+            flexDirection: 'column',
+            flexGrow: 1,
+            height: 100 + '%',
+            marginTop: 50
+          }}>
+            <Line width={300} data={this.state.chartData} options={chartconfig} />
+        </Card>
+        
+       : null}
 
         {this.state.showTable ?
           <Card zDepth={3} className='container frame table' containerStyle={{
@@ -219,32 +328,30 @@ class App extends Component {
           flexDirection: 'column',
           flexGrow: 1,
           height: 100 + '%',
-          marginTop : 50
+          marginTop : 50,
+          marginBottom: 100
         }}>
 
           <div style={{ display: 'flex', flexWrap: 'wrap', height: '100%' }}>
-            <div className='action-buttons'>
+            <div className='action-buttons' onClick={() => {
+              console.log('here')
+              this.setState({ ...this.state, modal: { open: true, type: 'receita', data: null } })
+            }}>
               <FontIcon 
-              onClick={() => {
-                console.log('here')
-                this.setState({...this.state, modal : { open : true, type : 'receita', data : null }})}}
               style={{display:'block'}} className='material-icons'>add_circle</FontIcon>
               <div style={{ marginTop: 5, color: 'gray' }}> Adicionar uma receita </div>
             </div>
-            <div className='action-buttons'>
+            <div className='action-buttons' onClick={() => { this.setState({ ...this.state, modal: { open: true, type: 'despesa', data: null } }) }}              >
               <FontIcon 
-                onClick={() => { this.setState({ ...this.state, modal: { open: true, type: 'despesa', data : null }})}}              
                 style={{ display: 'block' }} className='material-icons'>remove_circle</FontIcon>
               <div style={{marginTop:5, color : 'gray'}}> Adicionar uma despesa </div></div>
-            <div className='action-buttons'>
+            <div className='action-buttons' onClick={() => { this.setState({ showTable: !this.state.showTable }) }}>
               <FontIcon
-                onClick={() => { this.setState({ showTable : !this.state.showTable }) }}
                 style={{ display: 'block' }} className='material-icons'>assignment</FontIcon>
                 <div style={{ marginTop: 5, color: 'gray' }}> Ver tabela </div>
             </div>
-            <div className='action-buttons'>
+            <div className='action-buttons' onClick={() => { this.setState({ showGraph: !this.state.showGraph }) }}>
               <FontIcon
-                onClick={() => { this.setState({ ...this.state, modal: { open: true, type: 'despesa', data: null } }) }}
                 style={{ display: 'block' }} className='material-icons'>show_chart</FontIcon>
               <div style={{ marginTop: 5, color: 'gray' }}> Ver gráficos </div>
             </div>
@@ -262,7 +369,7 @@ class App extends Component {
 
       <div 
         className='record-button-wrapper' 
-        style={{ textAlign : 'center', width : '100%', bottom : 0 }}>
+        style={{ textAlign : 'center', width : '100%', bottom : 0}}>
           <FloatingActionButton 
             className={'record-button center'}
             backgroundColor={(this.state.recording ? 'lightgreen' : null || this.state.waiting ? 'gray' : null) || YELLOW } 

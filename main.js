@@ -85,7 +85,6 @@ async function getCustos() {
 // console.log(time)
 // writeTransacaoData(transacaoObj(new Date().valueOf(), "venda feno", "300"))
 
-
 app.get('/api/finances',(req,res) => {
   getCustos().then((data) => {res.json(data)})
 })
@@ -131,10 +130,9 @@ app.post('/api/stt', type, (req, res) => {
           console.error(err)
         } else {
           console.log(JSON.stringify(response, null, 2))
+          res.send(response)          
         }
-
       })
-      res.json({status : 200})
     }
   })
 })
